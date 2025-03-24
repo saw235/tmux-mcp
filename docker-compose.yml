@@ -8,4 +8,12 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+    volumes:
+      # Mount tmux socket and config directory for persistence
+      - tmux-socket:/tmp
+      - tmux-data:/root/.tmux
     restart: unless-stopped
+
+volumes:
+  tmux-socket:
+  tmux-data:
