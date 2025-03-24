@@ -1,65 +1,100 @@
-# Tmux MCP Server
+# Tmux MCP (Management Control Program)
 
-Model Context Protocol server that enables Claude Desktop to interact with and view tmux session content. This integration allows AI assistants to read from, control, and observe your terminal sessions.
+A REST API server for managing tmux sessions, windows, and panes. This server provides a programmatic interface to control tmux through HTTP endpoints.
 
 ## Features
 
-- List and search tmux sessions
-- View and navigate tmux windows and panes
-- Capture and expose terminal content from any pane
-- Execute commands in tmux panes and retrieve results (use it at your own risk ⚠️)
-- Create new tmux sessions and windows
+- Create and manage tmux sessions
+- Create and list windows within sessions
+- List panes within windows
+- Execute commands in specific panes
+- Capture pane content
+- Track command execution status
 
 ## Prerequisites
 
-- Node.js
-- tmux installed and running
+- Docker and Docker Compose
+- Or Node.js 20+ and tmux if running locally
 
-## Usage
+## Quick Start with Docker
 
-### Configure Claude Desktop
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/saw235/tmux-mcp.git
+   cd tmux-mcp
+   ```
 
-Add this MCP server to your Claude Desktop configuration:
+2. Start the server:
+   ```bash
+   docker-compose up -d
+   ```
 
-```json
-"mcpServers": {
-  "tmux": {
-    "command": "npx",
-    "args": ["-y", "tmux-mcp"]
+The server will be available at http://localhost:3000
+
+## API Endpoints
+
+### Health Check
+- GET `/health` - Check if the server is running
+
+### Tmux Status
+- GET `/tmux/status` - Check if tmux server is running
+
+### Sessions
+- GET `/tmux/sessions` - List all sessions
+- POST `/tmux/sessions` - Create a new session
+  ```json
+  {
+    "name": "session-name"
   }
-}
-```
+  ```
 
-### MCP server options
-
-You can optionally specify the command line shell you are using, if unspecified it defaults to `bash`
-
-```json
-"mcpServers": {
-  "tmux": {
-    "command": "npx",
-    "args": ["-y", "tmux-mcp", "--shell-type=fish"]
+### Windows
+- GET `/tmux/sessions/:sessionId/windows` - List windows in a session
+- POST `/tmux/sessions/:sessionId/windows` - Create a new window
+  ```json
+  {
+    "name": "window-name"
   }
-}
-```
+  ```
 
-The MCP server needs to know the shell only when executing commands, to properly read its exit status.
+### Panes
+- GET `/tmux/windows/:windowId/panes` - List panes in a window
+- GET `/tmux/panes/:paneId/content` - Get pane content
+  - Query params: `lines` (optional, default: 200)
 
-## Available Resources
+### Command Execution
+- POST `/tmux/panes/:paneId/execute` - Execute a command in a pane
+  ```json
+  {
+    "command": "echo 'hello world'"
+  }
+  ```
+- GET `/tmux/commands/:commandId` - Get command execution status
 
-- `tmux://sessions` - List all tmux sessions
-- `tmux://pane/{paneId}` - View content of a specific tmux pane
-- `tmux://command/{commandId}/result` - Results from executed commands
+## Development
 
-## Available Tools
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-- `list-sessions` - List all active tmux sessions
-- `find-session` - Find a tmux session by name
-- `list-windows` - List windows in a tmux session
-- `list-panes` - List panes in a tmux window
-- `capture-pane` - Capture content from a tmux pane
-- `create-session` - Create a new tmux session
-- `create-window` - Create a new window in a tmux session
-- `execute-command` - Execute a command in a tmux pane
-- `get-command-result` - Get the result of an executed command
+2. Start in development mode:
+   ```bash
+   npm run dev
+   ```
 
+## Building from Source
+
+1. Build TypeScript:
+   ```bash
+   npm run build
+   ```
+
+2. Start the production server:
+   ```bash
+   npm start
+   ```
+
+## License
+
+MIT
